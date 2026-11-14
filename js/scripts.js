@@ -1,7 +1,7 @@
 /*!
-* Start Bootstrap - Grayscale v7.0.6 (https://startbootstrap.com/theme/grayscale)
-* Copyright 2013-2023 Start Bootstrap
-* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-grayscale/blob/master/LICENSE)
+- Start Bootstrap - Grayscale v7.0.6 (https://startbootstrap.com/theme/grayscale)
+- Copyright 2013-2023 Start Bootstrap
+- Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-grayscale/blob/master/LICENSE)
 */
 //
 // Scripts
@@ -52,6 +52,7 @@ window.addEventListener('DOMContentLoaded', event => {
     });
 
 });
+
 document.addEventListener("DOMContentLoaded", function () {
     // Konum izni verilmezse kullanılacak yedek koordinat (İstanbul)
     const varsayilanKoordinat = [41.0082, 28.9784];
@@ -65,22 +66,27 @@ document.addEventListener("DOMContentLoaded", function () {
         position: "bottomright"
     }).addTo(map);
 
-    // OpenStreetMap katmanı
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap | ÇekBildir 2026"
-    }).addTo(map);
-
-    // 1. Katman Tanımları (Standart Harita ve Uydu Görüntüsü)
+    // 1. Katman Tanımları (Standart Harita ve Etiketli Uydu Görüntüsü)
     const sokakHaritasi = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap | ÇekBildir 2026"
     });
 
-    const uyduHaritasi = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    // Ham uydu fotoğrafı katmanı
+    const uyduGorseli = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
         attribution: "Tiles &copy; Esri | ÇekBildir 2026"
     });
+
+    // Uydu üzerine gelecek şeffaf şehir, ilçe, mahalle ve sokak isimleri katmanı
+    const yerEtiketleri = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+        subdomains: "abcd",
+        attribution: "&copy; OpenStreetMap &copy; CARTO"
+    });
+
+    // Uydu görüntüsü ve yer isimlerini tek bir hibrit grup altında birleştir
+    const uyduHaritasi = L.layerGroup([uyduGorseli, yerEtiketleri]);
 
     // Varsayılan olarak sokak haritasını ekle
     sokakHaritasi.addTo(map);
