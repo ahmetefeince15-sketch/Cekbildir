@@ -78,8 +78,8 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: "Tiles &copy; Esri | ÇekBildir 2026"
     });
 
-    // Uydu üzerine gelecek şeffaf şehir, ilçe, mahalle ve sokak isimleri katmanı
-    const yerEtiketleri = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png", {
+    // Uydu üzerinde net okunması için açık/beyaz renkli şehir, ilçe, mahalle ve sokak isimleri katmanı
+    const yerEtiketleri = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png", {
         maxZoom: 19,
         subdomains: "abcd",
         attribution: "&copy; OpenStreetMap &copy; CARTO"
