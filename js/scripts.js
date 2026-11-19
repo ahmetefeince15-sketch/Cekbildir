@@ -62,19 +62,107 @@ document.addEventListener("DOMContentLoaded", function () {
         [39.28, 40.38]
     );
 
-    // Elazığ İlçeleri ve Merkez Koordinatları
+    // Elazığ İlçeleri Detaylı Veritabanı (Merkez + 10 İlçe)
     const elazigIlceleri = {
-        "merkez": { ad: "Elazığ Merkez", coords: [38.6810, 39.2264], zoom: 13 },
-        "ağın": { ad: "Ağın", coords: [38.9436, 38.7164], zoom: 14 },
-        "alacakaya": { ad: "Alacakaya", coords: [38.7139, 40.1456], zoom: 14 },
-        "arıcak": { ad: "Arıcak", coords: [38.5833, 40.1333], zoom: 14 },
-        "baskil": { ad: "Baskil", coords: [38.5667, 38.8167], zoom: 14 },
-        "karakoçan": { ad: "Karakoçan", coords: [38.9500, 40.0167], zoom: 14 },
-        "keban": { ad: "Keban", coords: [38.7950, 38.7450], zoom: 14 },
-        "kovancılar": { ad: "Kovancılar", coords: [38.7208, 39.8736], zoom: 14 },
-        "maden": { ad: "Maden", coords: [38.3917, 39.6750], zoom: 14 },
-        "palu": { ad: "Palu", coords: [38.6917, 39.9667], zoom: 14 },
-        "sivrice": { ad: "Sivrice", coords: [38.4500, 39.3167], zoom: 14 }
+        "merkez": {
+            ad: "Elazığ Merkez",
+            coords: [38.6810, 39.2264],
+            zoom: 13,
+            ozet: "İlin idari, ticari ve kültürel merkezi; Harput tarihi bölgesi ve Fırat Üniversitesi kampüsleriyle öne çıkar.",
+            mahalleler: ["İzzetpaşa", "Sürsürü", "Hilalkent", "Ataşehir", "Harput", "Doğukent", "Yıldızbağları", "Rızaiye"],
+            oneCikanlar: ["Tarihi Harput Kalesi", "Ulu Camii", "Buzluk Mağarası", "Kültür Park"],
+            merkezeUzaklik: "0 km (İl Merkezi)"
+        },
+        "ağın": {
+            ad: "Ağın",
+            coords: [38.9436, 38.7164],
+            zoom: 14,
+            ozet: "Keban Baraj Gölü kıyısında yer alan, tarihi taş evleri ve leblebisiyle bilinen sakin bir ilçe.",
+            mahalleler: ["Merkez", "Bademli", "Pul", "Yeniköy"],
+            oneCikanlar: ["Ağın Leblebisi", "Keban Baraj Gölü Kıyısı", "Geleneksel Taş Evler"],
+            merkezeUzaklik: "~68 km"
+        },
+        "alacakaya": {
+            ad: "Alacakaya",
+            coords: [38.7139, 40.1456],
+            zoom: 14,
+            ozet: "Yüksek kaliteli krom yatakları ve mermer kaynaklarıyla tanınan, doğu kesiminde yer alan ilçe.",
+            mahalleler: ["Merkez", "Esenlik", "Yıldırım"],
+            oneCikanlar: ["Krom Madenciliği", "Mermer Ocakları", "Dağlık Vadiler"],
+            merkezeUzaklik: "~105 km"
+        },
+        "arıcak": {
+            ad: "Arıcak",
+            coords: [38.5833, 40.1333],
+            zoom: 14,
+            ozet: "İlin güneydoğusunda yüksek rakımlı ve engebeli coğrafyaya sahip, doğayla iç içe ilçe.",
+            mahalleler: ["Merkez", "Bükardı", "Üçocak"],
+            oneCikanlar: ["Yüksek Yaylalar", "Bükardı Beldesi", "Doğal Kaynak Suları"],
+            merkezeUzaklik: "~118 km"
+        },
+        "baskil": {
+            ad: "Baskil",
+            coords: [38.5667, 38.8167],
+            zoom: 14,
+            ozet: "Fırat Nehri ve Karakaya Baraj Gölü kıyısında bulunan, kayısı ve badem üretimiyle öne çıkan ilçe.",
+            mahalleler: ["Merkez", "Akuşağı", "Hacıuşağı", "Kuşsarayı"],
+            oneCikanlar: ["Karakaya Baraj Gölü", "Kayısı & Badem Bahçeleri", "Saklıkap Kanyonu"],
+            merkezeUzaklik: "~42 km"
+        },
+        "karakoçan": {
+            ad: "Karakoçan",
+            coords: [38.9500, 40.0167],
+            zoom: 14,
+            ozet: "Termal kaynakları, yaylaları ve tarım-hayvancılık potansiyeliyle dikkat çeken kuzeydoğu ilçesi.",
+            mahalleler: ["Merkez", "Sarıcan", "Kocadayı", "Başyurt"],
+            oneCikanlar: ["Koçyiğit Kaplıcaları", "Sarıcan Beldesi", "Yayla Turizmi"],
+            merkezeUzaklik: "~102 km"
+        },
+        "keban": {
+            ad: "Keban",
+            coords: [38.7950, 38.7450],
+            zoom: 14,
+            ozet: "Türkiye'nin en önemli hidroelektrik santrallerinden Keban Barajı ile anılan, alabalığıyla ünlü ilçe.",
+            mahalleler: ["Merkez", "Fırat", "Akgömlek", "Denizli"],
+            oneCikanlar: ["Keban Barajı ve Hidroelektrik Santrali", "Keban Alabalığı", "Baraj Gölü Manzarası"],
+            merkezeUzaklik: "~46 km"
+        },
+        "kovancılar": {
+            ad: "Kovancılar",
+            coords: [38.7208, 39.8736],
+            zoom: 14,
+            ozet: "Önemli kara yolu ve demir yolu güzergahı üzerinde yer alan, gelişmiş ticaret ve tarım ilçesi.",
+            mahalleler: ["Merkez", "Çakırkaş", "Yarımca", "Gökçedal"],
+            oneCikanlar: ["Kovancılar Ovası", "Çakırkaş Beldesi", "Ulaşım Kavşağı"],
+            merkezeUzaklik: "~72 km"
+        },
+        "maden": {
+            ad: "Maden",
+            coords: [38.3917, 39.6750],
+            zoom: 14,
+            ozet: "Tarihi madencilik geçmişi, Dicle Nehri'nin doğduğu bölge olması ve sarp vadileriyle tanınan ilçe.",
+            mahalleler: ["Merkez", "Bahadır", "Gezin", "Çayır"],
+            oneCikanlar: ["Dicle Nehri Kaynağı", "Tarihi Maden Dokusu", "Hazar Gölü Yakınlığı"],
+            merkezeUzaklik: "~80 km"
+        },
+        "palu": {
+            ad: "Palu",
+            coords: [38.6917, 39.9667],
+            zoom: 14,
+            ozet: "Murat Nehri kıyısında kurulu, tarihi kalesi, eski köprüsü ve köklü kültürel mirasıyla bilinen ilçe.",
+            mahalleler: ["Merkez", "Yeni", "Karşıbahçeler", "Beyhan"],
+            oneCikanlar: ["Tarihi Palu Kalesi", "Murat Nehri ve Tarihi Köprü", "Üryan Baba Türbesi"],
+            merkezeUzaklik: "~75 km"
+        },
+        "sivrice": {
+            ad: "Sivrice",
+            coords: [38.4500, 39.3167],
+            zoom: 14,
+            ozet: "Tektonik Hazar Gölü kıyısında konumlanan, yazlıkları, plajları ve Hazarbaba Dağı ile öne çıkan turizm ilçesi.",
+            mahalleler: ["Merkez", "Gözeli", "Yedikardeş", "Hazar"],
+            oneCikanlar: ["Hazar Gölü", "Hazarbaba Kayak Merkezi", "Göl Sahili ve Mesire Alanları"],
+            merkezeUzaklik: "~30 km"
+        }
     };
 
     // Haritayı Elazığ merkezinde ve Elazığ sınırlarına kilitli olarak başlat
@@ -123,27 +211,85 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 2. Harita / Uydu Geçiş Butonu Dinleyicisi
     const katmanBtn = document.getElementById("katman-degistir-btn");
-    katmanBtn.addEventListener("click", function () {
-        if (!uyduAktif) {
-            map.removeLayer(sokakHaritasi);
-            uyduHaritasi.addTo(map);
-            katmanBtn.innerHTML = '<i class="fas fa-map"></i> Harita Görünümü';
-            katmanBtn.classList.replace("btn-light", "btn-dark");
-            uyduAktif = true;
-        } else {
-            map.removeLayer(uyduHaritasi);
-            sokakHaritasi.addTo(map);
-            katmanBtn.innerHTML = '<i class="fas fa-satellite"></i> Uydu Görünümü';
-            katmanBtn.classList.replace("btn-dark", "btn-light");
-            uyduAktif = false;
-        }
-    });
+    if (katmanBtn) {
+        katmanBtn.addEventListener("click", function () {
+            if (!uyduAktif) {
+                map.removeLayer(sokakHaritasi);
+                uyduHaritasi.addTo(map);
+                katmanBtn.innerHTML = '<i class="fas fa-map"></i> Harita Görünümü';
+                katmanBtn.classList.replace("btn-light", "btn-dark");
+                uyduAktif = true;
+            } else {
+                map.removeLayer(uyduHaritasi);
+                sokakHaritasi.addTo(map);
+                katmanBtn.innerHTML = '<i class="fas fa-satellite"></i> Uydu Görünümü';
+                katmanBtn.classList.replace("btn-dark", "btn-light");
+                uyduAktif = false;
+            }
+        });
+    }
 
     // Başlangıç işaretçisi ve doğruluk dairesi
     let marker = L.marker(varsayilanKoordinat)
         .addTo(map)
         .bindPopup("<b>Elazığ Haritası</b><br>Elazığ Merkez");
     let dogrulukDairesi = null;
+
+    // Seçilen ilçenin detayını ekranda göstermek için kapsayıcıyı hazırla
+    function ilceDetayKutusunuGetir() {
+        let kart = document.getElementById("ilce-detay-karti");
+        if (!kart) {
+            const aramaInput = document.getElementById("il-ilce-input");
+            kart = document.createElement("div");
+            kart.id = "ilce-detay-karti";
+            kart.className = "card shadow-sm mt-3 d-none";
+            kart.style.zIndex = "1050";
+
+            if (aramaInput && aramaInput.parentElement) {
+                aramaInput.parentElement.insertAdjacentElement("afterend", kart);
+            } else {
+                document.body.appendChild(kart);
+            }
+        }
+        return kart;
+    }
+
+    function ilceDetayiniEkrandaGoster(bilgi) {
+        const kart = ilceDetayKutusunuGetir();
+        const mahalleEtiketleri = (bilgi.mahalleler || [])
+            .map(m => `<span class="badge bg-light text-dark border me-1 mb-1">${m}</span>`)
+            .join("");
+        const oneCikanListe = (bilgi.oneCikanlar || [])
+            .map(item => `<li class="small mb-1"><i class="fas fa-check-circle text-success me-1"></i>${item}</li>`)
+            .join("");
+
+        kart.classList.remove("d-none");
+        kart.innerHTML = `
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="card-title mb-0 fw-bold">${bilgi.ad}</h6>
+                        <small class="text-muted">Merkeze Uzaklık: ${bilgi.merkezeUzaklik} • ${bilgi.coords[0].toFixed(4)}, ${bilgi.coords[1].toFixed(4)}</small>
+                    </div>
+                    <button type="button" class="btn-close" aria-label="Kapat" id="ilce-detay-kapat-btn"></button>
+                </div>
+                <p class="small text-secondary mb-2">${bilgi.ozet}</p>
+                <div class="mb-2">
+                    <div class="small fw-semibold mb-1">Öne Çıkan Yerler & Özellikler:</div>
+                    <ul class="list-unstyled mb-0">${oneCikanListe}</ul>
+                </div>
+                <div>
+                    <div class="small fw-semibold mb-1">Başlıca Mahalle / Semtler:</div>
+                    <div>${mahalleEtiketleri}</div>
+                </div>
+            </div>
+        `;
+
+        const kapatBtn = document.getElementById("ilce-detay-kapat-btn");
+        if (kapatBtn) {
+            kapatBtn.addEventListener("click", () => kart.classList.add("d-none"));
+        }
+    }
 
     // --- KÜFÜR, ARGO VE SAÇMA İFADE FİLTRESİ ---
     function metniNormalizeEt(metin = "") {
@@ -334,10 +480,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function formuSifirla() {
         secilenFotoDataUrl = null;
         denizAlanindaMi = false;
-        fotografInput.value = "";
-        yaziInput.value = "";
-        onizlemeImg.src = "";
-        onizlemeKutusu.classList.add("d-none");
+        if (fotografInput) fotografInput.value = "";
+        if (yaziInput) yaziInput.value = "";
+        if (onizlemeImg) onizlemeImg.src = "";
+        if (onizlemeKutusu) onizlemeKutusu.classList.add("d-none");
         if (denizUyariKutusu) denizUyariKutusu.classList.add("d-none");
         if (denizBildirimiOnay) denizBildirimiOnay.checked = false;
     }
@@ -478,7 +624,10 @@ document.addEventListener("DOMContentLoaded", function () {
             bildirimKayitlari.set(bildirimId, { pin: yeniPin, latlng: aktifTiklananLatLng });
             yeniPin.openPopup();
 
-            document.getElementById("secilen-konum").innerText = `${etiketBasligi} Elazığ haritasına eklendi.`;
+            const durumEtiketi = document.getElementById("secilen-konum");
+            if (durumEtiketi) {
+                durumEtiketi.innerText = `${etiketBasligi} Elazığ haritasına eklendi.`;
+            }
             paneliKapat();
         });
     }
@@ -486,7 +635,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // Haritaya tıklandığında işaretçiyi taşı ve Sorun Bildir panelini aç
     map.on("click", function (e) {
         if (!elazigSinirlari.contains(e.latlng)) {
-            document.getElementById("secilen-konum").innerText = "Lütfen Elazığ il sınırları içinden bir nokta seçin.";
+            const durumEtiketi = document.getElementById("secilen-konum");
+            if (durumEtiketi) {
+                durumEtiketi.innerText = "Lütfen Elazığ il sınırları içinden bir nokta seçin.";
+            }
             return;
         }
 
@@ -502,7 +654,10 @@ document.addEventListener("DOMContentLoaded", function () {
             .setPopupContent(`Seçilen Konum (Elazığ):<br>Enlem: ${lat}, Boylam: ${lng}`)
             .openPopup();
 
-        document.getElementById("secilen-konum").innerText = `Seçilen Koordinat: ${lat}, ${lng}`;
+        const durumEtiketi = document.getElementById("secilen-konum");
+        if (durumEtiketi) {
+            durumEtiketi.innerText = `Seçilen Koordinat: ${lat}, ${lng}`;
+        }
         paneliAc(e.latlng);
     });
 
@@ -511,11 +666,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const durumEtiketi = document.getElementById("secilen-konum");
 
         if (!navigator.geolocation) {
-            durumEtiketi.innerText = "Tarayıcınız konum özelliğini desteklemiyor. Elazığ Merkez gösteriliyor.";
+            if (durumEtiketi) durumEtiketi.innerText = "Tarayıcınız konum özelliğini desteklemiyor. Elazığ Merkez gösteriliyor.";
             return;
         }
 
-        durumEtiketi.innerText = "Mevcut konumunuz bulunuyor...";
+        if (durumEtiketi) durumEtiketi.innerText = "Mevcut konumunuz bulunuyor...";
 
         navigator.geolocation.getCurrentPosition(
             function (pozisyon) {
@@ -530,7 +685,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         .setLatLng(varsayilanKoordinat)
                         .setPopupContent("<b>Elazığ Merkez</b><br>Konumunuz Elazığ sınırları dışında.")
                         .openPopup();
-                    durumEtiketi.innerText = "Konumunuz Elazığ sınırları dışında; Elazığ Merkez gösteriliyor.";
+                    if (durumEtiketi) durumEtiketi.innerText = "Konumunuz Elazığ sınırları dışında; Elazığ Merkez gösteriliyor.";
                     return;
                 }
 
@@ -551,7 +706,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fillOpacity: 0.15
                 }).addTo(map);
 
-                durumEtiketi.innerText = `Konumunuz: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                if (durumEtiketi) durumEtiketi.innerText = `Konumunuz: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
             },
             function (hata) {
                 map.setView(varsayilanKoordinat, 13);
@@ -565,7 +720,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (hata.code === hata.TIMEOUT) {
                     hataMesaji = "Konum alma zaman aşımına uğradı. Elazığ Merkez gösteriliyor.";
                 }
-                durumEtiketi.innerText = hataMesaji;
+                if (durumEtiketi) durumEtiketi.innerText = hataMesaji;
             },
             {
                 enableHighAccuracy: true,
@@ -577,6 +732,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function turkceKucuk(metin = "") {
         return metin.toLocaleLowerCase("tr").trim();
+    }
+
+    function ilceAnahtariBul(arananMetin) {
+        const norm = metniNormalizeEt(arananMetin)
+            .replace(/\belazig\b/g, "")
+            .replace(/\bilcesi\b/g, "")
+            .replace(/\bilçesi\b/g, "")
+            .replace(/,/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!norm || norm === "merkez" || norm === "elazig merkez") {
+            return "merkez";
+        }
+
+        if (elazigIlceleri[norm]) {
+            return norm;
+        }
+
+        for (const [anahtar, bilgi] of Object.entries(elazigIlceleri)) {
+            const normAd = metniNormalizeEt(bilgi.ad).replace(/\belazig\b/g, "").trim();
+            if (norm === normAd || normAd.includes(norm) || norm.includes(normAd)) {
+                return anahtar;
+            }
+        }
+
+        return null;
     }
 
     function enUygunElazigSonucuSec(sonuclar, arananTerim) {
@@ -624,9 +806,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return enIyiKayit;
     }
 
-    function haritayiKonumaOdakla(lat, lon, baslik, aciklama, zoomSeviyesi = 14) {
+    function haritayiKonumaOdakla(lat, lon, baslik, aciklama, zoomSeviyesi = 14, popupIcerik = null) {
         if (!elazigSinirlari.contains(L.latLng(lat, lon))) {
-            document.getElementById("secilen-konum").innerText = `"${baslik}" Elazığ sınırları dışında.`;
+            const durumEtiketi = document.getElementById("secilen-konum");
+            if (durumEtiketi) durumEtiketi.innerText = `"${baslik}" Elazığ sınırları dışında.`;
             return;
         }
 
@@ -638,10 +821,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         marker
             .setLatLng([lat, lon])
-            .setPopupContent(`<b>${baslik}</b><br><small>${aciklama}</small>`)
+            .setPopupContent(popupIcerik || `<b>${baslik}</b><br><small>${aciklama}</small>`)
             .openPopup();
 
-        document.getElementById("secilen-konum").innerText = `Konum: ${baslik} (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
+        const durumEtiketi = document.getElementById("secilen-konum");
+        if (durumEtiketi) {
+            durumEtiketi.innerText = `Konum: ${baslik} (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
+        }
     }
 
     function ilceyeGit(ilceAnahtari) {
@@ -653,13 +839,25 @@ document.addEventListener("DOMContentLoaded", function () {
             inputEl.value = bilgi.ad;
         }
 
+        const popupHtml = `
+            <div style="min-width: 210px;">
+                <strong>${bilgi.ad}</strong><br>
+                <span class="text-muted" style="font-size: 11px;">Merkeze uzaklık: ${bilgi.merkezeUzaklik}</span>
+                <p class="mb-1 mt-1" style="font-size: 12px;">${bilgi.ozet}</p>
+                <div style="font-size: 11px;"><b>Öne Çıkanlar:</b> ${(bilgi.oneCikanlar || []).join(", ")}</div>
+            </div>
+        `;
+
         haritayiKonumaOdakla(
             bilgi.coords[0],
             bilgi.coords[1],
             bilgi.ad,
             `${bilgi.ad}, Elazığ, Türkiye`,
-            bilgi.zoom
+            bilgi.zoom,
+            popupHtml
         );
+
+        ilceDetayiniEkrandaGoster(bilgi);
     }
 
     // Sayfada #elazig-ilce-butonlari kapsayıcısı varsa ilçe butonlarını üret
@@ -677,7 +875,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Elazığ İçi İlçe / Mahalle / Yer Arama Fonksiyonu
     async function konumaGit() {
-        const arananYer = document.getElementById("il-ilce-input").value.trim();
+        const inputEl = document.getElementById("il-ilce-input");
+        const arananYer = inputEl ? inputEl.value.trim() : "";
         const durumEtiketi = document.getElementById("secilen-konum");
 
         if (!arananYer) {
@@ -685,23 +884,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const normArama = metniNormalizeEt(arananYer)
-            .replace(/\belazig\b/g, "")
-            .replace(/,/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-
-        if (!normArama || normArama === "merkez") {
-            ilceyeGit("merkez");
+        const bulunanIlceAnahtari = ilceAnahtariBul(arananYer);
+        if (bulunanIlceAnahtari) {
+            ilceyeGit(bulunanIlceAnahtari);
             return;
         }
 
-        if (elazigIlceleri[normArama]) {
-            ilceyeGit(normArama);
-            return;
-        }
-
-        durumEtiketi.innerText = `Elazığ içinde "${arananYer}" aranıyor...`;
+        if (durumEtiketi) durumEtiketi.innerText = `Elazığ içinde "${arananYer}" aranıyor...`;
 
         try {
             const sorguMetni = `${arananYer}, Elazığ, Türkiye`;
@@ -709,7 +898,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch(url);
             const data = await response.json();
 
-            const secilen = data && data.length > 0 ? enUygunElazigSonucuSec(data, normArama) : null;
+            const secilen = data && data.length > 0 ? enUygunElazigSonucuSec(data, arananYer) : null;
 
             if (secilen) {
                 const lat = parseFloat(secilen.lat);
@@ -718,11 +907,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 haritayiKonumaOdakla(lat, lon, arananYer, tamAd, 15);
             } else {
-                durumEtiketi.innerText = `Elazığ sınırları içinde "${arananYer}" bulunamadı.`;
+                if (durumEtiketi) durumEtiketi.innerText = `Elazığ sınırları içinde "${arananYer}" bulunamadı.`;
             }
         } catch (error) {
             console.error("Konum arama hatası:", error);
-            durumEtiketi.innerText = "Konum aranırken bir bağlantı hatası oluştu.";
+            if (durumEtiketi) durumEtiketi.innerText = "Konum aranırken bir bağlantı hatası oluştu.";
         }
     }
 
@@ -730,12 +919,18 @@ document.addEventListener("DOMContentLoaded", function () {
     mevcutKonumaGit();
 
     // Olay dinleyicileri
-    document.getElementById("mevcut-konum-btn").addEventListener("click", mevcutKonumaGit);
-    document.getElementById("konum-ara-btn").addEventListener("click", konumaGit);
-    document.getElementById("il-ilce-input").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            konumaGit();
-        }
-    });
+    const mevcutKonumBtn = document.getElementById("mevcut-konum-btn");
+    const konumAraBtn = document.getElementById("konum-ara-btn");
+    const ilIlceInput = document.getElementById("il-ilce-input");
+
+    if (mevcutKonumBtn) mevcutKonumBtn.addEventListener("click", mevcutKonumaGit);
+    if (konumAraBtn) konumAraBtn.addEventListener("click", konumaGit);
+    if (ilIlceInput) {
+        ilIlceInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                konumaGit();
+            }
+        });
+    }
 });
