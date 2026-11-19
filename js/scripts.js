@@ -5,7 +5,7 @@
 */
 //
 // Scripts
-// 
+//
 
 window.addEventListener('DOMContentLoaded', event => {
 
@@ -16,14 +16,13 @@ window.addEventListener('DOMContentLoaded', event => {
             return;
         }
         if (window.scrollY === 0) {
-            navbarCollapsible.classList.remove('navbar-shrink')
+            navbarCollapsible.classList.remove('navbar-shrink');
         } else {
-            navbarCollapsible.classList.add('navbar-shrink')
+            navbarCollapsible.classList.add('navbar-shrink');
         }
-
     };
 
-    // Shrink the navbar 
+    // Shrink the navbar
     navbarShrink();
 
     // Shrink the navbar when page is scrolled
@@ -36,7 +35,7 @@ window.addEventListener('DOMContentLoaded', event => {
             target: '#mainNav',
             rootMargin: '0px 0px -40%',
         });
-    };
+    }
 
     // Collapse responsive navbar when toggler is visible
     const navbarToggler = document.body.querySelector('.navbar-toggler');
@@ -72,21 +71,27 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: "&copy; OpenStreetMap | ÇekBildir 2026"
     });
 
-    // Ham uydu fotoğrafı katmanı
+    // API anahtarı gerektirmeyen uydu fotoğrafı katmanı
     const uyduGorseli = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
         attribution: "Tiles &copy; Esri | ÇekBildir 2026"
     });
 
-    // Uydu üzerinde net okunması için açık/beyaz renkli şehir, ilçe, mahalle ve sokak isimleri katmanı
-    const yerEtiketleri = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png", {
+    // Uydu üzerinde açık/beyaz renkli şehir, ilçe, mahalle ve yer isimleri katmanı
+    const yerEtiketleri = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png", {
         maxZoom: 19,
         subdomains: "abcd",
         attribution: "&copy; OpenStreetMap &copy; CARTO"
     });
 
-    // Uydu görüntüsü ve yer isimlerini tek bir hibrit grup altında birleştir
-    const uyduHaritasi = L.layerGroup([uyduGorseli, yerEtiketleri]);
+    // İsteğe bağlı ek sınır ve yer isimleri katmanı (şehir/ilçe isimlerini daha da belirginleştirir)
+    const esriSinirVeYerler = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19,
+        attribution: "Labels &copy; Esri"
+    });
+
+    // Uydu görüntüsü ve şehir/yer isimlerini tek bir hibrit grup altında birleştir
+    const uyduHaritasi = L.layerGroup([uyduGorseli, esriSinirVeYerler, yerEtiketleri]);
 
     // Varsayılan olarak sokak haritasını ekle
     sokakHaritasi.addTo(map);
@@ -148,16 +153,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const lng = pozisyon.coords.longitude;
                 const dogruluk = pozisyon.coords.accuracy; // metre cinsinden doğruluk
 
-                // Haritayı kullanıcının konumuna odakla
                 map.flyTo([lat, lng], 16);
 
-                // İşaretçiyi güncelle
                 marker
                     .setLatLng([lat, lng])
                     .setPopupContent(`<b>Mevcut Konumunuz</b><br>Doğruluk: ~${Math.round(dogruluk)} metre`)
                     .openPopup();
 
-                // Önceki doğruluk dairesi varsa temizle ve yenisini çiz
                 if (dogrulukDairesi) {
                     map.removeLayer(dogrulukDairesi);
                 }
@@ -182,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 durumEtiketi.innerText = hataMesaji;
             },
             {
-                enableHighAccuracy: true, // GPS ile en yüksek doğruluğu ister
+                enableHighAccuracy: true,
                 timeout: 10000,
                 maximumAge: 0
             }
