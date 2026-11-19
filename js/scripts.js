@@ -53,92 +53,92 @@ window.addEventListener('DOMContentLoaded', event => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Konum izni verilmezse kullanılacak yedek koordinat (İstanbul)
+    // Konum izni verilmezse kullanılacak yedek koordinat (İstanbul - Fatih/Eminönü merkez)
     const varsayilanKoordinat = [41.0082, 28.9784];
 
-    // Türkiye 81 İl Merkezi Koordinatları
-    const ilMerkezleri = {
-        "adana": [37.0000, 35.3213],
-        "adıyaman": [37.7648, 38.2786],
-        "afyonkarahisar": [38.7507, 30.5567],
-        "ağrı": [39.7191, 43.0503],
-        "aksaray": [38.3687, 34.0370],
-        "amasya": [40.6499, 35.8353],
-        "ankara": [39.9334, 32.8597],
-        "antalya": [36.8969, 30.7133],
-        "ardahan": [41.1105, 42.7022],
-        "artvin": [41.1828, 41.8183],
-        "aydın": [37.8560, 27.8416],
-        "balıkesir": [39.6484, 27.8826],
-        "bartın": [41.6344, 32.3375],
-        "batman": [37.8812, 41.1351],
-        "bayburt": [40.2552, 40.2249],
-        "bilecik": [40.0567, 30.0665],
-        "bingöl": [38.8854, 40.4983],
-        "bitlis": [38.3938, 42.1232],
-        "bolu": [40.7392, 31.6089],
-        "burdur": [37.7203, 30.2908],
-        "bursa": [40.1885, 29.0610],
-        "çanakkale": [40.1553, 26.4142],
-        "çankırı": [40.6013, 33.6134],
-        "çorum": [40.5506, 34.9556],
-        "denizli": [37.7765, 29.0864],
-        "diyarbakır": [37.9144, 40.2306],
-        "düzce": [40.8438, 31.1565],
-        "edirne": [41.6818, 26.5623],
-        "elazığ": [38.6810, 39.2264],
-        "erzincan": [39.7500, 39.5000],
-        "erzurum": [39.9000, 41.2700],
-        "eskişehir": [39.7767, 30.5206],
-        "gaziantep": [37.0662, 37.3833],
-        "giresun": [40.9128, 38.3895],
-        "gümüşhane": [40.4600, 39.4814],
-        "hakkari": [37.5833, 43.7333],
-        "hatay": [36.4018, 36.3498],
-        "ığdır": [39.9237, 44.0450],
-        "ısparta": [37.7648, 30.5566],
-        "istanbul": [41.0082, 28.9784],
-        "izmir": [38.4237, 27.1428],
-        "kahramanmaraş": [37.5858, 36.9371],
-        "karabük": [41.2061, 32.6204],
-        "karaman": [37.1759, 33.2287],
-        "kars": [40.6013, 43.0975],
-        "kastamonu": [41.3887, 33.7827],
-        "kayseri": [38.7312, 35.4787],
-        "kırıkkale": [39.8468, 33.5153],
-        "kırklareli": [41.7333, 27.2167],
-        "kırşehir": [39.1425, 34.1709],
-        "kilis": [36.7184, 37.1212],
-        "kocaeli": [40.8533, 29.8815],
-        "konya": [37.8746, 32.4932],
-        "kütahya": [39.4167, 29.9833],
-        "malatya": [38.3552, 38.3095],
-        "manisa": [38.6191, 27.4289],
-        "mardin": [37.3212, 40.7245],
-        "mersin": [36.8121, 34.6415],
-        "muğla": [37.2153, 28.3636],
-        "muş": [38.9462, 41.7539],
-        "nevşehir": [38.6939, 34.6857],
-        "niğde": [37.9667, 34.6833],
-        "ordu": [40.9839, 37.8764],
-        "osmaniye": [37.0742, 36.2476],
-        "rize": [41.0201, 40.5234],
-        "sakarya": [40.7569, 30.3781],
-        "samsun": [41.2867, 36.3300],
-        "siirt": [37.9333, 41.9500],
-        "sinop": [42.0231, 35.1531],
-        "sivas": [39.7477, 37.0179],
-        "şanlıurfa": [37.1591, 38.7969],
-        "şırnak": [37.4187, 42.4918],
-        "tekirdağ": [40.9833, 27.5167],
-        "tokat": [40.3167, 36.5500],
-        "trabzon": [41.0027, 39.7168],
-        "tunceli": [39.1079, 39.5401],
-        "uşak": [38.6823, 29.4082],
-        "van": [38.4891, 43.4089],
-        "yalova": [40.6500, 29.2667],
-        "yozgat": [39.8181, 34.8147],
-        "zonguldak": [41.4564, 31.7987]
+    // 81 İl İçin Merkez İlçe / Şehir Merkezi Bilgileri (Merkez İlçe Adı ve Koordinatı)
+    const ilMerkezIlceleri = {
+        "adana": { ilce: "Seyhan", coords: [36.9914, 35.3308] },
+        "adıyaman": { ilce: "Merkez", coords: [37.7648, 38.2786] },
+        "afyonkarahisar": { ilce: "Merkez", coords: [38.7507, 30.5567] },
+        "ağrı": { ilce: "Merkez", coords: [39.7191, 43.0503] },
+        "aksaray": { ilce: "Merkez", coords: [38.3687, 34.0370] },
+        "amasya": { ilce: "Merkez", coords: [40.6499, 35.8353] },
+        "ankara": { ilce: "Çankaya", coords: [39.9208, 32.8541] },
+        "antalya": { ilce: "Muratpaşa", coords: [36.8841, 30.7056] },
+        "ardahan": { ilce: "Merkez", coords: [41.1105, 42.7022] },
+        "artvin": { ilce: "Merkez", coords: [41.1828, 41.8183] },
+        "aydın": { ilce: "Efeler", coords: [37.8450, 27.8396] },
+        "balıkesir": { ilce: "Karesi", coords: [39.6484, 27.8826] },
+        "bartın": { ilce: "Merkez", coords: [41.6344, 32.3375] },
+        "batman": { ilce: "Merkez", coords: [37.8812, 41.1351] },
+        "bayburt": { ilce: "Merkez", coords: [40.2552, 40.2249] },
+        "bilecik": { ilce: "Merkez", coords: [40.0567, 30.0665] },
+        "bingöl": { ilce: "Merkez", coords: [38.8854, 40.4983] },
+        "bitlis": { ilce: "Merkez", coords: [38.3938, 42.1232] },
+        "bolu": { ilce: "Merkez", coords: [40.7392, 31.6089] },
+        "burdur": { ilce: "Merkez", coords: [37.7203, 30.2908] },
+        "bursa": { ilce: "Osmangazi", coords: [40.1885, 29.0610] },
+        "çanakkale": { ilce: "Merkez", coords: [40.1553, 26.4142] },
+        "çankırı": { ilce: "Merkez", coords: [40.6013, 33.6134] },
+        "çorum": { ilce: "Merkez", coords: [40.5506, 34.9556] },
+        "denizli": { ilce: "Pamukkale", coords: [37.7765, 29.0864] },
+        "diyarbakır": { ilce: "Yenişehir", coords: [37.9144, 40.2306] },
+        "düzce": { ilce: "Merkez", coords: [40.8438, 31.1565] },
+        "edirne": { ilce: "Merkez", coords: [41.6818, 26.5623] },
+        "elazığ": { ilce: "Merkez", coords: [38.6810, 39.2264] },
+        "erzincan": { ilce: "Merkez", coords: [39.7500, 39.5000] },
+        "erzurum": { ilce: "Yakutiye", coords: [39.9043, 41.2679] },
+        "eskişehir": { ilce: "Tepebaşı", coords: [39.7767, 30.5206] },
+        "gaziantep": { ilce: "Şahinbey", coords: [37.0662, 37.3833] },
+        "giresun": { ilce: "Merkez", coords: [40.9128, 38.3895] },
+        "gümüşhane": { ilce: "Merkez", coords: [40.4600, 39.4814] },
+        "hakkari": { ilce: "Merkez", coords: [37.5833, 43.7333] },
+        "hatay": { ilce: "Antakya", coords: [36.2025, 36.1604] },
+        "ığdır": { ilce: "Merkez", coords: [39.9237, 44.0450] },
+        "ısparta": { ilce: "Merkez", coords: [37.7648, 30.5566] },
+        "istanbul": { ilce: "Fatih", coords: [41.0082, 28.9784] },
+        "izmir": { ilce: "Konak", coords: [38.4237, 27.1428] },
+        "kahramanmaraş": { ilce: "Dulkadiroğlu", coords: [37.5858, 36.9371] },
+        "karabük": { ilce: "Merkez", coords: [41.2061, 32.6204] },
+        "karaman": { ilce: "Merkez", coords: [37.1759, 33.2287] },
+        "kars": { ilce: "Merkez", coords: [40.6013, 43.0975] },
+        "kastamonu": { ilce: "Merkez", coords: [41.3887, 33.7827] },
+        "kayseri": { ilce: "Kocasinan", coords: [38.7312, 35.4787] },
+        "kırıkkale": { ilce: "Merkez", coords: [39.8468, 33.5153] },
+        "kırklareli": { ilce: "Merkez", coords: [41.7333, 27.2167] },
+        "kırşehir": { ilce: "Merkez", coords: [39.1425, 34.1709] },
+        "kilis": { ilce: "Merkez", coords: [36.7184, 37.1212] },
+        "kocaeli": { ilce: "İzmit", coords: [40.7654, 29.9408] },
+        "konya": { ilce: "Selçuklu", coords: [37.8746, 32.4932] },
+        "kütahya": { ilce: "Merkez", coords: [39.4167, 29.9833] },
+        "malatya": { ilce: "Battalgazi", coords: [38.3552, 38.3095] },
+        "manisa": { ilce: "Yunusemre", coords: [38.6191, 27.4289] },
+        "mardin": { ilce: "Artuklu", coords: [37.3129, 40.7350] },
+        "mersin": { ilce: "Yenişehir", coords: [36.8121, 34.6415] },
+        "muğla": { ilce: "Menteşe", coords: [37.2153, 28.3636] },
+        "muş": { ilce: "Merkez", coords: [38.9462, 41.7539] },
+        "nevşehir": { ilce: "Merkez", coords: [38.6939, 34.6857] },
+        "niğde": { ilce: "Merkez", coords: [37.9667, 34.6833] },
+        "ordu": { ilce: "Altınordu", coords: [40.9839, 37.8764] },
+        "osmaniye": { ilce: "Merkez", coords: [37.0742, 36.2476] },
+        "rize": { ilce: "Merkez", coords: [41.0201, 40.5234] },
+        "sakarya": { ilce: "Adapazarı", coords: [40.7731, 30.3948] },
+        "samsun": { ilce: "İlkadım", coords: [41.2797, 36.3361] },
+        "siirt": { ilce: "Merkez", coords: [37.9333, 41.9500] },
+        "sinop": { ilce: "Merkez", coords: [42.0231, 35.1531] },
+        "sivas": { ilce: "Merkez", coords: [39.7477, 37.0179] },
+        "şanlıurfa": { ilce: "Haliliye", coords: [37.1591, 38.7969] },
+        "şırnak": { ilce: "Merkez", coords: [37.4187, 42.4918] },
+        "tekirdağ": { ilce: "Süleymanpaşa", coords: [40.9781, 27.5117] },
+        "tokat": { ilce: "Merkez", coords: [40.3167, 36.5500] },
+        "trabzon": { ilce: "Ortahisar", coords: [41.0027, 39.7168] },
+        "tunceli": { ilce: "Merkez", coords: [39.1079, 39.5401] },
+        "uşak": { ilce: "Merkez", coords: [38.6823, 29.4082] },
+        "van": { ilce: "İpekyolu", coords: [38.4891, 43.4089] },
+        "yalova": { ilce: "Merkez", coords: [40.6500, 29.2667] },
+        "yozgat": { ilce: "Merkez", coords: [39.8181, 34.8147] },
+        "zonguldak": { ilce: "Merkez", coords: [41.4564, 31.7987] }
     };
 
     // Haritayı başlat
@@ -276,26 +276,31 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
-    // Türkçe karakter uyumlu küçük harfe çevirme yardımcısı
     function turkceKucuk(metin = "") {
         return metin.toLocaleLowerCase("tr").trim();
     }
 
-    // Arama metnini normalize eder ("samsun merkez" -> il: "samsun", merkezMi: true)
+    function basHarfBuyuk(metin = "") {
+        return metin
+            .split(" ")
+            .filter(Boolean)
+            .map(kelime => kelime.charAt(0).toLocaleUpperCase("tr") + kelime.slice(1))
+            .join(" ");
+    }
+
+    // "Samsun", "Samsun merkez", "Samsun, merkez" veya "İlkadım, Samsun" gibi girdileri çözümler
     function sorguyuCozumle(arananYer) {
         const temiz = turkceKucuk(arananYer).replace(/\s+/g, " ");
         const parcalar = temiz.split(",").map(p => p.trim()).filter(Boolean);
 
-        // Tek parça veya "X, merkez" / "X merkez" durumlarını kontrol et
         if (parcalar.length === 1) {
             const tek = parcalar[0];
-            if (ilMerkezleri[tek]) {
-                return { il: tek, ilce: null, merkezMi: true };
+            if (ilMerkezIlceleri[tek]) {
+                return { il: tek, ilce: ilMerkezIlceleri[tek].ilce, merkezMi: true };
             }
-            // "samsun merkez" veya "merkez samsun" gibi ifadeler
             const merkezOlmadan = tek.replace(/\bmerkez\b/g, "").trim();
-            if (merkezOlmadan && ilMerkezleri[merkezOlmadan]) {
-                return { il: merkezOlmadan, ilce: null, merkezMi: true };
+            if (merkezOlmadan && ilMerkezIlceleri[merkezOlmadan]) {
+                return { il: merkezOlmadan, ilce: ilMerkezIlceleri[merkezOlmadan].ilce, merkezMi: true };
             }
             return { il: null, ilce: tek, merkezMi: false };
         }
@@ -303,17 +308,16 @@ document.addEventListener("DOMContentLoaded", function () {
         const ilk = parcalar[0].replace(/\bmerkez\b/g, "").trim();
         const ikinci = parcalar[1].replace(/\bmerkez\b/g, "").trim();
 
-        if (ilMerkezleri[ikinci] && (!ilk || ilk === "merkez")) {
-            return { il: ikinci, ilce: null, merkezMi: true };
+        if (ilMerkezIlceleri[ikinci] && (!ilk || ilk === "merkez")) {
+            return { il: ikinci, ilce: ilMerkezIlceleri[ikinci].ilce, merkezMi: true };
         }
-        if (ilMerkezleri[ilk] && (!ikinci || ikinci === "merkez")) {
-            return { il: ilk, ilce: null, merkezMi: true };
+        if (ilMerkezIlceleri[ilk] && (!ikinci || ikinci === "merkez")) {
+            return { il: ilk, ilce: ilMerkezIlceleri[ilk].ilce, merkezMi: true };
         }
 
         return { il: ikinci || null, ilce: ilk || null, merkezMi: false };
     }
 
-    // Dönen aday sonuçlar arasından en doğru il/ilçe/yer kaydını seçer
     function enUygunSonucuSec(sonuclar, cozulen) {
         let enIyiKayit = sonuclar[0];
         let enYuksekPuan = -Infinity;
@@ -327,10 +331,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const addrsType = item.addresstype || item.type || "";
 
             if (cozulen.il && cozulen.ilce) {
-                if (ilAdi.includes(cozulen.il)) puan += 50;
-                if (ilceAdi.includes(cozulen.ilce) || nameAdi.includes(cozulen.ilce)) puan += 50;
+                const hedefIl = turkceKucuk(cozulen.il);
+                const hedefIlce = turkceKucuk(cozulen.ilce);
+                if (ilAdi.includes(hedefIl)) puan += 50;
+                if (ilceAdi === hedefIlce || nameAdi === hedefIlce) puan += 80;
+                else if (ilceAdi.includes(hedefIlce) || nameAdi.includes(hedefIlce)) puan += 40;
             } else if (cozulen.ilce) {
-                if (nameAdi === cozulen.ilce || ilceAdi === cozulen.ilce) puan += 80;
+                const hedefIlce = turkceKucuk(cozulen.ilce);
+                if (nameAdi === hedefIlce || ilceAdi === hedefIlce) puan += 80;
                 if (addrsType === "village" || addrsType === "hamlet") puan -= 30;
             }
 
@@ -343,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return enIyiKayit;
     }
 
-    function haritayiKonumaOdakla(lat, lon, baslik, aciklama, zoomSeviyesi = 14) {
+    function haritayiKonumaOdakla(lat, lon, baslik, aciklama, zoomSeviyesi = 13) {
         if (dogrulukDairesi) {
             map.removeLayer(dogrulukDairesi);
         }
@@ -370,11 +378,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const cozulen = sorguyuCozumle(arananYer);
 
-        // 1. İl veya "[İl] merkez" aramasıysa 81 il merkez koordinatını doğrudan kullan
-        if (cozulen.il && cozulen.merkezMi && ilMerkezleri[cozulen.il]) {
-            const [lat, lon] = ilMerkezleri[cozulen.il];
-            const gorunenAd = cozulen.il.charAt(0).toLocaleUpperCase("tr") + cozulen.il.slice(1) + " Merkez";
-            haritayiKonumaOdakla(lat, lon, gorunenAd, `${gorunenAd}, Türkiye`, 12);
+        // İl veya "[İl] merkez" aramasında doğrudan merkez ilçe (ör. İlkadım, Samsun) koordinatına git
+        if (cozulen.il && cozulen.merkezMi && ilMerkezIlceleri[cozulen.il]) {
+            const merkezBilgi = ilMerkezIlceleri[cozulen.il];
+            const [lat, lon] = merkezBilgi.coords;
+            const ilAd = basHarfBuyuk(cozulen.il);
+            const merkezAd = `${ilAd} (${merkezBilgi.ilce} Merkez)`;
+            haritayiKonumaOdakla(lat, lon, merkezAd, `${merkezBilgi.ilce}, ${ilAd}, Türkiye`, 13);
             return;
         }
 
