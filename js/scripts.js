@@ -204,7 +204,105 @@ document.addEventListener("DOMContentLoaded", function () {
     let marker = L.marker(varsayilanKoordinat).addTo(map);
     let dogrulukDairesi = null;
 
-    // --- SORUN BİLDİR TASARIMI, DENİZ KONTROLÜ & YÖNETİMİ ---
+    // --- KÜFÜR, ARGO VE SAÇMA İFADE FİLTRESİ ---
+    function metniNormalizeEt(metin = "") {
+        return metin
+            .toLocaleLowerCase("tr")
+            .replace(/ı/g, "i")
+            .replace(/ğ/g, "g")
+            .replace(/ü/g, "u")
+            .replace(/ş/g, "s")
+            .replace(/ö/g, "o")
+            .replace(/ç/g, "c")
+            .replace(/(.)\1{2,}/g, "$1");
+    }
+
+    const yasakliKokler = [
+        "amk", "aq", "mk", "oç", "oc", "piç", "pic", "sik", "siktir", "yarrak",
+        "taşak", "tassak", "ibne", "ipne", "göt", "got", "pezevenk", "kahpe",
+        "orospu", "sürtük", "surtuk", "fahişe", "fahise", "mal", "aptal",
+        "salak", "gerizekali", "geri zekali", "dangalak", "hıyar", "hiyar", "kezban"
+    ];
+
+    const klavyeKalipDizileri = ["qwerty", "asdf", "zxcv", "hjkl", "1234", "abcd"];
+
+    function sacmaIfadeMi(metin) {
+        const temiz = metin.trim();
+        if (!temiz) return true;
+
+        const norm = metniNormalizeEt(temiz);
+        const kelimeler = norm.replace(/[^a-z0-9\s]/g, " ").trim().split(/\s+/).filter(Boolean);
+
+        if (kelimeler.length === 1 && kelimeler[0].length < 3) {
+            return true;
+        }
+
+        const birlesik = kelimeler.join("");
+        if (klavyeKalipDizileri.some(kalip => birlesik.includes(kalip) && birlesik.length <= kalip.length + 2)) {
+            return true;
+        }
+
+        const temizKar = temiz.replace(/\s+/g, "");
+        if (temizKar.length >= 4) {
+            const frekans = {};
+            for (const ch of temizKar) {
+                frekans[ch] = (frekans[ch] || 0) + 1;
+            }
+            const enCokTekrar = Math.max(...Object.values(frekans));
+            if (enCokTekrar / temizKar.length >= 0.7) {
+                return true;
+            }
+        }
+
+        const sesliHarfler = /[aeıioöuü]/i;
+        const sesliHarfsizUzunKelime = kelimeler.some(
+            k => k.length >= 5 && !/^\d+$/.test(k) && !sesliHarfler.test(k)
+        );
+        if (sesliHarfsizUzunKelime) {
+            return true;
+        }
+
+        if (/[bcçdfgğhjklmnprsştvyz]{4,}/i.test(norm)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function metniFiltrele(metin) {
+        const ham = (metin || "").trim();
+        if (!ham) {
+            return { gecerli: false, sebep: "Lütfen sorunla ilgili bir açıklama yazın." };
+        }
+
+        const norm = metniNormalizeEt(ham);
+        const kelimeler = norm.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
+
+        const kufurVarMi = yasakliKokler.some(kok => {
+            const normKok = metniNormalizeEt(kok);
+            const kelimeEslesmesi = kelimeler.some(k => k === normKok || (normKok.length >= 4 && k.startsWith(normKok)));
+            const bitisikEslesme = normKok.length >= 3 && norm.replace(/\s+/g, "").includes(normKok);
+            return kelimeEslesmesi || bitisikEslesme;
+        });
+
+        if (kufurVarMi) {
+            return {
+                gecerli: false,
+                sebep: "Lütfen küfür veya argo içeren ifadeler kullanmayın."
+            };
+        }
+
+        if (sacmaIfadeMi(ham)) {
+            return {
+                gecerli: false,
+                sebep: "Lütfen sorunu anlaşılır ve anlamlı bir şekilde ifade edin."
+            };
+        }
+
+        return { gecerli: true, sebep: "" };
+    }
+
+    // --- SORUN BİLDİR TASARIMI, DENİZ KONTROLÜ, SİLME & YÖNETİMİ ---
     const sorunPanel = document.getElementById("sorun-bildir-panel");
     const sorunKapatBtn = document.getElementById("sorun-kapat-btn");
     const bildirimKoordinatMetni = document.getElementById("bildirim-koordinat-metni");
@@ -220,9 +318,41 @@ document.addEventListener("DOMContentLoaded", function () {
     let aktifTiklananLatLng = null;
     let secilenFotoDataUrl = null;
     let denizAlanindaMi = false;
+    let bildirimSayaci = 0;
     const bildirimKatmani = L.layerGroup().addTo(map);
+    const bildirimKayitlari = new Map();
 
-    // Tıklanan noktanın deniz veya su alanı olup olmadığını kontrol eder
+    // Belirli bir bildirimi haritadan ve kayıtlardan siler
+    function bildirimiSil(bildirimId) {
+        const kayit = bildirimKayitlari.get(bildirimId);
+        if (!kayit) return;
+
+        bildirimKatmani.removeLayer(kayit.pin);
+        bildirimKayitlari.delete(bildirimId);
+        map.closePopup();
+
+        const durumEtiketi = document.getElementById("secilen-konum");
+        if (durumEtiketi) {
+            durumEtiketi.innerText = "Seçilen sorun bildirimi silindi.";
+        }
+    }
+
+    // Popup içindeki sil butonunu dinle (event delegation)
+    map.on("popupopen", function (e) {
+        const popupEl = e.popup.getElement();
+        if (!popupEl) return;
+
+        const silBtn = popupEl.querySelector(".sorun-sil-btn");
+        if (!silBtn) return;
+
+        silBtn.addEventListener("click", function () {
+            const id = silBtn.getAttribute("data-bildirim-id");
+            if (id) {
+                bildirimiSil(id);
+            }
+        });
+    });
+
     async function denizVeyaSuAlaniMi(latlng) {
         try {
             const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=12&addressdetails=1`;
@@ -230,7 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) return false;
             const data = await response.json();
 
-            // Nominatim deniz/su alanlarında genellikle error ("Unable to geocode") veya water/sea sınıfı döndürür
             if (data && data.error) {
                 return true;
             }
@@ -249,7 +378,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const addr = data.address || {};
-            // Kara adresi (road, suburb, district, town, city, village, province) yoksa deniz ihtimali yüksektir
             const karaAlanlari = [
                 addr.road, addr.suburb, addr.neighbourhood, addr.quarter,
                 addr.district, addr.county, addr.town, addr.city, addr.village, addr.province, addr.state
@@ -285,7 +413,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         denizAlanindaMi = await denizVeyaSuAlaniMi(latlng);
 
-        // Panel kapatıldıysa veya farklı bir konuma geçildiyse güncelleme yapma
         if (!aktifTiklananLatLng || aktifTiklananLatLng.lat !== latlng.lat || aktifTiklananLatLng.lng !== latlng.lng) {
             return;
         }
@@ -358,6 +485,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            if (aciklama) {
+                const filtreSonucu = metniFiltrele(aciklama);
+                if (!filtreSonucu.gecerli) {
+                    alert(filtreSonucu.sebep);
+                    if (yaziInput) yaziInput.focus();
+                    return;
+                }
+            }
+
+            const bildirimId = `bildirim_${++bildirimSayaci}`;
             const denizBildirimiMi = denizAlanindaMi && denizOnayiVarMi;
             const etiketBasligi = denizBildirimiMi ? "Deniz / Kıyı Bildirimi" : "Sorun Bildirimi";
             const pinRengi = denizBildirimiMi ? "#0d6efd" : "#dc3545";
@@ -372,7 +509,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .replace(/>/g, "&gt;");
 
             const yaziHtml = aciklama
-                ? `<p class="mb-1 small">${guvenliYazi}</p>`
+                ? `<p class="mb-2 small">${guvenliYazi}</p>`
                 : "";
 
             const yeniPin = L.circleMarker(aktifTiklananLatLng, {
@@ -384,15 +521,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }).addTo(bildirimKatmani);
 
             yeniPin.bindPopup(`
-                <div style="min-width: 185px;">
+                <div style="min-width: 190px;">
                     <strong style="color: ${pinRengi};">${etiketBasligi}</strong>
                     <div class="text-muted" style="font-size: 11px; margin-bottom: 6px;">
                         ${aktifTiklananLatLng.lat.toFixed(5)}, ${aktifTiklananLatLng.lng.toFixed(5)}
                     </div>
                     ${fotoHtml}
                     ${yaziHtml}
+                    <button type="button" class="btn btn-sm btn-outline-danger w-100 py-1 sorun-sil-btn" data-bildirim-id="${bildirimId}">
+                        <i class="fas fa-trash-alt me-1"></i>Sorunu Sil
+                    </button>
                 </div>
-            `).openPopup();
+            `);
+
+            bildirimKayitlari.set(bildirimId, { pin: yeniPin, latlng: aktifTiklananLatLng });
+            yeniPin.openPopup();
 
             document.getElementById("secilen-konum").innerText = `${etiketBasligi} haritaya eklendi.`;
             paneliKapat();
