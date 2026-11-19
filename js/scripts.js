@@ -204,10 +204,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let marker = L.marker(varsayilanKoordinat).addTo(map);
     let dogrulukDairesi = null;
 
-    // --- SORUN BİLDİR TASARIMI & YÖNETİMİ ---
+    // --- SORUN BİLDİR TASARIMI, DENİZ KONTROLÜ & YÖNETİMİ ---
     const sorunPanel = document.getElementById("sorun-bildir-panel");
     const sorunKapatBtn = document.getElementById("sorun-kapat-btn");
     const bildirimKoordinatMetni = document.getElementById("bildirim-koordinat-metni");
+    const denizUyariKutusu = document.getElementById("deniz-uyari-kutusu");
+    const denizBildirimiOnay = document.getElementById("deniz-bildirimi-onay");
     const fotografInput = document.getElementById("sorun-fotograf-input");
     const onizlemeKutusu = document.getElementById("fotograf-onizleme-kutusu");
     const onizlemeImg = document.getElementById("fotograf-onizleme-img");
@@ -217,24 +219,86 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let aktifTiklananLatLng = null;
     let secilenFotoDataUrl = null;
+    let denizAlanindaMi = false;
     const bildirimKatmani = L.layerGroup().addTo(map);
+
+    // Tıklanan noktanın deniz veya su alanı olup olmadığını kontrol eder
+    async function denizVeyaSuAlaniMi(latlng) {
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=12&addressdetails=1`;
+            const response = await fetch(url);
+            if (!response.ok) return false;
+            const data = await response.json();
+
+            // Nominatim deniz/su alanlarında genellikle error ("Unable to geocode") veya water/sea sınıfı döndürür
+            if (data && data.error) {
+                return true;
+            }
+
+            const cls = (data.class || "").toLowerCase();
+            const type = (data.type || "").toLowerCase();
+            const category = (data.category || "").toLowerCase();
+            const suTurleri = ["water", "sea", "ocean", "bay", "strait", "reservoir", "lake", "river", "canal", "maritime"];
+
+            if (
+                suTurleri.includes(cls) ||
+                suTurleri.includes(type) ||
+                suTurleri.includes(category)
+            ) {
+                return true;
+            }
+
+            const addr = data.address || {};
+            // Kara adresi (road, suburb, district, town, city, village, province) yoksa deniz ihtimali yüksektir
+            const karaAlanlari = [
+                addr.road, addr.suburb, addr.neighbourhood, addr.quarter,
+                addr.district, addr.county, addr.town, addr.city, addr.village, addr.province, addr.state
+            ].filter(Boolean);
+
+            return karaAlanlari.length === 0;
+        } catch (err) {
+            console.warn("Deniz/su kontrolü yapılamadı:", err);
+            return false;
+        }
+    }
 
     function formuSifirla() {
         secilenFotoDataUrl = null;
+        denizAlanindaMi = false;
         fotografInput.value = "";
         yaziInput.value = "";
         onizlemeImg.src = "";
         onizlemeKutusu.classList.add("d-none");
+        if (denizUyariKutusu) denizUyariKutusu.classList.add("d-none");
+        if (denizBildirimiOnay) denizBildirimiOnay.checked = false;
     }
 
-    function paneliAc(latlng) {
+    async function paneliAc(latlng) {
         if (!sorunPanel) return;
         aktifTiklananLatLng = latlng;
         formuSifirla();
+
         if (bildirimKoordinatMetni) {
-            bildirimKoordinatMetni.innerText = `Koordinat: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+            bildirimKoordinatMetni.innerText = `Koordinat: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)} (alan kontrol ediliyor...)`;
         }
         sorunPanel.classList.remove("d-none");
+
+        denizAlanindaMi = await denizVeyaSuAlaniMi(latlng);
+
+        // Panel kapatıldıysa veya farklı bir konuma geçildiyse güncelleme yapma
+        if (!aktifTiklananLatLng || aktifTiklananLatLng.lat !== latlng.lat || aktifTiklananLatLng.lng !== latlng.lng) {
+            return;
+        }
+
+        if (bildirimKoordinatMetni) {
+            bildirimKoordinatMetni.innerText = denizAlanindaMi
+                ? `Koordinat: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)} • Deniz / Su Alanı`
+                : `Koordinat: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+        }
+
+        if (denizUyariKutusu) {
+            denizUyariKutusu.classList.toggle("d-none", !denizAlanindaMi);
+        }
     }
 
     function paneliKapat() {
@@ -277,9 +341,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (sorunGonderBtn) {
         sorunGonderBtn.addEventListener("click", function () {
             const aciklama = yaziInput ? yaziInput.value.trim() : "";
+            const denizOnayiVarMi = denizBildirimiOnay ? denizBildirimiOnay.checked : false;
 
             if (!aktifTiklananLatLng) {
                 alert("Lütfen önce haritadan bir konum seçin.");
+                return;
+            }
+
+            if (denizAlanindaMi && !denizOnayiVarMi) {
+                alert("Bu nokta deniz/su alanında görünüyor. Deniz/Kıyı Bildirimi olarak göndermek için kutuyu işaretleyin veya kara üzerinden bir konum seçin.");
                 return;
             }
 
@@ -287,6 +357,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Lütfen fotoğraf ekleyin veya sorunla ilgili yazı girin.");
                 return;
             }
+
+            const denizBildirimiMi = denizAlanindaMi && denizOnayiVarMi;
+            const etiketBasligi = denizBildirimiMi ? "Deniz / Kıyı Bildirimi" : "Sorun Bildirimi";
+            const pinRengi = denizBildirimiMi ? "#0d6efd" : "#dc3545";
 
             const fotoHtml = secilenFotoDataUrl
                 ? `<div class="mb-2"><img src="${secilenFotoDataUrl}" alt="Sorun fotoğrafı" style="width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px;"></div>`
@@ -305,13 +379,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 radius: 9,
                 color: "#ffffff",
                 weight: 2,
-                fillColor: "#dc3545",
+                fillColor: pinRengi,
                 fillOpacity: 0.95
             }).addTo(bildirimKatmani);
 
             yeniPin.bindPopup(`
-                <div style="min-width: 180px;">
-                    <strong style="color: #dc3545;">Sorun Bildirimi</strong>
+                <div style="min-width: 185px;">
+                    <strong style="color: ${pinRengi};">${etiketBasligi}</strong>
                     <div class="text-muted" style="font-size: 11px; margin-bottom: 6px;">
                         ${aktifTiklananLatLng.lat.toFixed(5)}, ${aktifTiklananLatLng.lng.toFixed(5)}
                     </div>
@@ -320,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
             `).openPopup();
 
-            document.getElementById("secilen-konum").innerText = "Sorun bildirimi haritaya eklendi.";
+            document.getElementById("secilen-konum").innerText = `${etiketBasligi} haritaya eklendi.`;
             paneliKapat();
         });
     }
