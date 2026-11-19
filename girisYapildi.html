@@ -49,7 +49,7 @@
         <div id="map"></div>
 
         <!-- Konuma Tıklandığında Açılan Sorun Bildir Paneli -->
-        <div id="sorun-bildir-panel" class="card shadow-lg border-0 d-none" style="position: fixed; top: 85px; right: 20px; width: 350px; max-width: calc(100vw - 40px); z-index: 1050; border-radius: 14px;">
+        <div id="sorun-bildir-panel" class="card shadow-lg border-0 d-none" style="position: fixed; top: 85px; right: 20px; width: 360px; max-width: calc(100vw - 40px); z-index: 1050; border-radius: 14px;">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 px-3" style="border-radius: 14px 14px 0 0;">
                 <h6 class="mb-0 fw-bold">
                     <i class="fas fa-exclamation-circle text-warning me-2"></i>Sorun Bildir
@@ -58,9 +58,25 @@
             </div>
 
             <div class="card-body p-3">
-                <div class="small text-muted mb-3">
+                <div class="small text-muted mb-2">
                     <i class="fas fa-map-marker-alt text-danger me-1"></i>
                     <span id="bildirim-koordinat-metni">Konum seçilmedi</span>
+                </div>
+
+                <!-- Deniz / Su Alanı Uyarısı ve Seçeneği -->
+                <div id="deniz-uyari-kutusu" class="alert alert-warning py-2 px-3 small d-none mb-3" role="alert">
+                    <div class="fw-semibold mb-1">
+                        <i class="fas fa-water me-1"></i>Deniz / Su Alanı Algılandı
+                    </div>
+                    <div class="mb-2" style="line-height: 1.35;">
+                        Seçilen nokta deniz veya su alanında görünüyor. İsterseniz bunu <strong>Deniz / Kıyı Bildirimi</strong> olarak gönderebilir veya kara üzerinden başka bir nokta seçebilirsiniz.
+                    </div>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="deniz-bildirimi-onay">
+                        <label class="form-check-label fw-semibold" for="deniz-bildirimi-onay">
+                            Deniz / Kıyı Bildirimi olarak gönder
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Yöntem 1: Fotoğraf Ekle -->
