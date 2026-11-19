@@ -55,7 +55,12 @@ window.addEventListener('DOMContentLoaded', event => {
 document.addEventListener("DOMContentLoaded", function () {
     // Varsayılan koordinat: Elazığ Merkez
     const varsayilanKoordinat = [38.6810, 39.2264];
-    const odakIlAdi = "elazığ";
+
+    // Elazığ il sınırları (güneybatı - kuzeydoğu bounding box)
+    const elazigSinirlari = L.latLngBounds(
+        [38.12, 38.45],
+        [39.28, 40.38]
+    );
 
     // Elazığ İlçeleri ve Merkez Koordinatları
     const elazigIlceleri = {
@@ -72,9 +77,12 @@ document.addEventListener("DOMContentLoaded", function () {
         "sivrice": { ad: "Sivrice", coords: [38.4500, 39.3167], zoom: 14 }
     };
 
-    // Haritayı Elazığ merkezinde başlat
+    // Haritayı Elazığ merkezinde ve Elazığ sınırlarına kilitli olarak başlat
     const map = L.map("map", {
-        zoomControl: false
+        zoomControl: false,
+        minZoom: 9,
+        maxBounds: elazigSinirlari,
+        maxBoundsViscosity: 1.0
     }).setView(varsayilanKoordinat, 13);
 
     L.control.zoom({
@@ -477,6 +485,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Haritaya tıklandığında işaretçiyi taşı ve Sorun Bildir panelini aç
     map.on("click", function (e) {
+        if (!elazigSinirlari.contains(e.latlng)) {
+            document.getElementById("secilen-konum").innerText = "Lütfen Elazığ il sınırları içinden bir nokta seçin.";
+            return;
+        }
+
         const lat = e.latlng.lat.toFixed(5);
         const lng = e.latlng.lng.toFixed(5);
 
@@ -493,7 +506,7 @@ document.addEventListener("DOMContentLoaded", function () {
         paneliAc(e.latlng);
     });
 
-    // Kullanıcının Kendi GPS Konumunu Bulma Fonksiyonu
+    // Kullanıcının Kendi GPS Konumunu Bulma Fonksiyonu (Elazığ sınırları içinde)
     function mevcutKonumaGit() {
         const durumEtiketi = document.getElementById("secilen-konum");
 
@@ -509,6 +522,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 const lat = pozisyon.coords.latitude;
                 const lng = pozisyon.coords.longitude;
                 const dogruluk = pozisyon.coords.accuracy;
+                const konumLatLng = L.latLng(lat, lng);
+
+                if (!elazigSinirlari.contains(konumLatLng)) {
+                    map.flyTo(varsayilanKoordinat, 13);
+                    marker
+                        .setLatLng(varsayilanKoordinat)
+                        .setPopupContent("<b>Elazığ Merkez</b><br>Konumunuz Elazığ sınırları dışında.")
+                        .openPopup();
+                    durumEtiketi.innerText = "Konumunuz Elazığ sınırları dışında; Elazığ Merkez gösteriliyor.";
+                    return;
+                }
 
                 map.flyTo([lat, lng], 16);
 
@@ -556,11 +580,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function enUygunElazigSonucuSec(sonuclar, arananTerim) {
-        let enIyiKayit = sonuclar[0];
+        let enIyiKayit = null;
         let enYuksekPuan = -Infinity;
         const hedef = turkceKucuk(arananTerim);
 
         for (const item of sonuclar) {
+            const lat = parseFloat(item.lat);
+            const lon = parseFloat(item.lon);
+            if (!elazigSinirlari.contains(L.latLng(lat, lon))) {
+                continue;
+            }
+
             let puan = parseFloat(item.importance || 0) * 10;
             const addr = item.address || {};
             const ilAdi = turkceKucuk(addr.province || addr.state || "");
@@ -573,8 +603,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (elazigIcindeMi) {
                 puan += 120;
-            } else {
-                puan -= 80;
             }
 
             if (nameAdi === hedef || ilceAdi === hedef) {
@@ -597,6 +625,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function haritayiKonumaOdakla(lat, lon, baslik, aciklama, zoomSeviyesi = 14) {
+        if (!elazigSinirlari.contains(L.latLng(lat, lon))) {
+            document.getElementById("secilen-konum").innerText = `"${baslik}" Elazığ sınırları dışında.`;
+            return;
+        }
+
         if (dogrulukDairesi) {
             map.removeLayer(dogrulukDairesi);
         }
@@ -611,7 +644,38 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("secilen-konum").innerText = `Konum: ${baslik} (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
     }
 
-    // Elazığ İçi İl ve İlçe / Mahalle / Yer Arama Fonksiyonu
+    function ilceyeGit(ilceAnahtari) {
+        const bilgi = elazigIlceleri[ilceAnahtari];
+        if (!bilgi) return;
+
+        const inputEl = document.getElementById("il-ilce-input");
+        if (inputEl) {
+            inputEl.value = bilgi.ad;
+        }
+
+        haritayiKonumaOdakla(
+            bilgi.coords[0],
+            bilgi.coords[1],
+            bilgi.ad,
+            `${bilgi.ad}, Elazığ, Türkiye`,
+            bilgi.zoom
+        );
+    }
+
+    // Sayfada #elazig-ilce-butonlari kapsayıcısı varsa ilçe butonlarını üret
+    const ilceButonKapsayici = document.getElementById("elazig-ilce-butonlari");
+    if (ilceButonKapsayici) {
+        Object.entries(elazigIlceleri).forEach(([anahtar, bilgi]) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-sm btn-outline-secondary me-1 mb-1";
+            btn.textContent = bilgi.ad.replace("Elazığ ", "");
+            btn.addEventListener("click", () => ilceyeGit(anahtar));
+            ilceButonKapsayici.appendChild(btn);
+        });
+    }
+
+    // Elazığ İçi İlçe / Mahalle / Yer Arama Fonksiyonu
     async function konumaGit() {
         const arananYer = document.getElementById("il-ilce-input").value.trim();
         const durumEtiketi = document.getElementById("secilen-konum");
@@ -628,26 +692,12 @@ document.addEventListener("DOMContentLoaded", function () {
             .trim();
 
         if (!normArama || normArama === "merkez") {
-            const merkezBilgi = elazigIlceleri["merkez"];
-            haritayiKonumaOdakla(
-                merkezBilgi.coords[0],
-                merkezBilgi.coords[1],
-                merkezBilgi.ad,
-                "Elazığ Merkez, Türkiye",
-                merkezBilgi.zoom
-            );
+            ilceyeGit("merkez");
             return;
         }
 
         if (elazigIlceleri[normArama]) {
-            const ilceBilgi = elazigIlceleri[normArama];
-            haritayiKonumaOdakla(
-                ilceBilgi.coords[0],
-                ilceBilgi.coords[1],
-                `${ilceBilgi.ad} (Elazığ)`,
-                `${ilceBilgi.ad}, Elazığ, Türkiye`,
-                ilceBilgi.zoom
-            );
+            ilceyeGit(normArama);
             return;
         }
 
@@ -659,15 +709,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch(url);
             const data = await response.json();
 
-            if (data && data.length > 0) {
-                const secilen = enUygunElazigSonucuSec(data, normArama);
+            const secilen = data && data.length > 0 ? enUygunElazigSonucuSec(data, normArama) : null;
+
+            if (secilen) {
                 const lat = parseFloat(secilen.lat);
                 const lon = parseFloat(secilen.lon);
                 const tamAd = secilen.display_name;
 
                 haritayiKonumaOdakla(lat, lon, arananYer, tamAd, 15);
             } else {
-                durumEtiketi.innerText = `Elazığ'da "${arananYer}" bulunamadı. Lütfen yazımı kontrol edin.`;
+                durumEtiketi.innerText = `Elazığ sınırları içinde "${arananYer}" bulunamadı.`;
             }
         } catch (error) {
             console.error("Konum arama hatası:", error);
