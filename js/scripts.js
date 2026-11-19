@@ -204,7 +204,128 @@ document.addEventListener("DOMContentLoaded", function () {
     let marker = L.marker(varsayilanKoordinat).addTo(map);
     let dogrulukDairesi = null;
 
-    // Haritaya tıklandığında işaretçiyi taşı
+    // --- SORUN BİLDİR TASARIMI & YÖNETİMİ ---
+    const sorunPanel = document.getElementById("sorun-bildir-panel");
+    const sorunKapatBtn = document.getElementById("sorun-kapat-btn");
+    const bildirimKoordinatMetni = document.getElementById("bildirim-koordinat-metni");
+    const fotografInput = document.getElementById("sorun-fotograf-input");
+    const onizlemeKutusu = document.getElementById("fotograf-onizleme-kutusu");
+    const onizlemeImg = document.getElementById("fotograf-onizleme-img");
+    const fotografKaldirBtn = document.getElementById("fotograf-kaldir-btn");
+    const yaziInput = document.getElementById("sorun-yazi-input");
+    const sorunGonderBtn = document.getElementById("sorun-gonder-btn");
+
+    let aktifTiklananLatLng = null;
+    let secilenFotoDataUrl = null;
+    const bildirimKatmani = L.layerGroup().addTo(map);
+
+    function formuSifirla() {
+        secilenFotoDataUrl = null;
+        fotografInput.value = "";
+        yaziInput.value = "";
+        onizlemeImg.src = "";
+        onizlemeKutusu.classList.add("d-none");
+    }
+
+    function paneliAc(latlng) {
+        if (!sorunPanel) return;
+        aktifTiklananLatLng = latlng;
+        formuSifirla();
+        if (bildirimKoordinatMetni) {
+            bildirimKoordinatMetni.innerText = `Koordinat: ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+        }
+        sorunPanel.classList.remove("d-none");
+    }
+
+    function paneliKapat() {
+        if (!sorunPanel) return;
+        sorunPanel.classList.add("d-none");
+    }
+
+    if (sorunKapatBtn) {
+        sorunKapatBtn.addEventListener("click", paneliKapat);
+    }
+
+    if (fotografInput) {
+        fotografInput.addEventListener("change", function () {
+            const dosya = this.files && this.files[0];
+            if (!dosya) {
+                secilenFotoDataUrl = null;
+                onizlemeKutusu.classList.add("d-none");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (olay) {
+                secilenFotoDataUrl = olay.target.result;
+                onizlemeImg.src = secilenFotoDataUrl;
+                onizlemeKutusu.classList.remove("d-none");
+            };
+            reader.readAsDataURL(dosya);
+        });
+    }
+
+    if (fotografKaldirBtn) {
+        fotografKaldirBtn.addEventListener("click", function () {
+            secilenFotoDataUrl = null;
+            fotografInput.value = "";
+            onizlemeImg.src = "";
+            onizlemeKutusu.classList.add("d-none");
+        });
+    }
+
+    if (sorunGonderBtn) {
+        sorunGonderBtn.addEventListener("click", function () {
+            const aciklama = yaziInput ? yaziInput.value.trim() : "";
+
+            if (!aktifTiklananLatLng) {
+                alert("Lütfen önce haritadan bir konum seçin.");
+                return;
+            }
+
+            if (!secilenFotoDataUrl && !aciklama) {
+                alert("Lütfen fotoğraf ekleyin veya sorunla ilgili yazı girin.");
+                return;
+            }
+
+            const fotoHtml = secilenFotoDataUrl
+                ? `<div class="mb-2"><img src="${secilenFotoDataUrl}" alt="Sorun fotoğrafı" style="width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px;"></div>`
+                : "";
+
+            const guvenliYazi = aciklama
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const yaziHtml = aciklama
+                ? `<p class="mb-1 small">${guvenliYazi}</p>`
+                : "";
+
+            const yeniPin = L.circleMarker(aktifTiklananLatLng, {
+                radius: 9,
+                color: "#ffffff",
+                weight: 2,
+                fillColor: "#dc3545",
+                fillOpacity: 0.95
+            }).addTo(bildirimKatmani);
+
+            yeniPin.bindPopup(`
+                <div style="min-width: 180px;">
+                    <strong style="color: #dc3545;">Sorun Bildirimi</strong>
+                    <div class="text-muted" style="font-size: 11px; margin-bottom: 6px;">
+                        ${aktifTiklananLatLng.lat.toFixed(5)}, ${aktifTiklananLatLng.lng.toFixed(5)}
+                    </div>
+                    ${fotoHtml}
+                    ${yaziHtml}
+                </div>
+            `).openPopup();
+
+            document.getElementById("secilen-konum").innerText = "Sorun bildirimi haritaya eklendi.";
+            paneliKapat();
+        });
+    }
+
+    // Haritaya tıklandığında işaretçiyi taşı ve Sorun Bildir panelini aç
     map.on("click", function (e) {
         const lat = e.latlng.lat.toFixed(5);
         const lng = e.latlng.lng.toFixed(5);
@@ -219,6 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .openPopup();
 
         document.getElementById("secilen-konum").innerText = `Seçilen Koordinat: ${lat}, ${lng}`;
+        paneliAc(e.latlng);
     });
 
     // Kullanıcının Kendi GPS Konumunu Bulma Fonksiyonu
@@ -288,7 +410,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .join(" ");
     }
 
-    // "Samsun", "Samsun merkez", "Samsun, merkez" veya "İlkadım, Samsun" gibi girdileri çözümler
     function sorguyuCozumle(arananYer) {
         const temiz = turkceKucuk(arananYer).replace(/\s+/g, " ");
         const parcalar = temiz.split(",").map(p => p.trim()).filter(Boolean);
@@ -378,7 +499,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const cozulen = sorguyuCozumle(arananYer);
 
-        // İl veya "[İl] merkez" aramasında doğrudan merkez ilçe (ör. İlkadım, Samsun) koordinatına git
         if (cozulen.il && cozulen.merkezMi && ilMerkezIlceleri[cozulen.il]) {
             const merkezBilgi = ilMerkezIlceleri[cozulen.il];
             const [lat, lon] = merkezBilgi.coords;
