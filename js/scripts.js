@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: "&copy; OpenStreetMap &copy; CARTO"
     });
 
-    // İsteğe bağlı ek sınır ve yer isimleri katmanı (şehir/ilçe isimlerini daha da belirginleştirir)
+    // İsteğe bağlı ek sınır ve yer isimleri katmanı
     const esriSinirVeYerler = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
         attribution: "Labels &copy; Esri"
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
             function (pozisyon) {
                 const lat = pozisyon.coords.latitude;
                 const lng = pozisyon.coords.longitude;
-                const dogruluk = pozisyon.coords.accuracy; // metre cinsinden doğruluk
+                const dogruluk = pozisyon.coords.accuracy;
 
                 map.flyTo([lat, lng], 16);
 
@@ -191,6 +191,62 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+    // Türkçe karakter uyumlu küçük harfe çevirme yardımcısı
+    function turkceKucuk(metin = "") {
+        return metin.toLocaleLowerCase("tr").trim();
+    }
+
+    // Dönen aday sonuçlar arasından en doğru il/ilçe/yer kaydını seçer
+    function enUygunSonucuSec(sonuclar, arananYer) {
+        const arananKucuk = turkceKucuk(arananYer);
+        const parcalar = arananKucuk.split(",").map(p => p.trim()).filter(Boolean);
+        const tekKelimeMi = parcalar.length === 1;
+
+        let enIyiKayit = sonuclar[0];
+        let enYuksekPuan = -Infinity;
+
+        for (const item of sonuclar) {
+            let puan = parseFloat(item.importance || 0) * 10;
+            const addr = item.address || {};
+            const ilAdi = turkceKucuk(addr.province || addr.state || "");
+            const ilceAdi = turkceKucuk(addr.district || addr.county || addr.town || addr.city || "");
+            const nameAdi = turkceKucuk(item.name || "");
+            const addrsType = item.addresstype || item.type || "";
+
+            if (tekKelimeMi) {
+                // Tek bir şehir adı girildiyse il/şehir sınır kaydına yüksek öncelik ver
+                if (ilAdi === arananKucuk && (addrsType === "province" || addrsType === "state" || addrsType === "city" || item.class === "boundary")) {
+                    puan += 100;
+                }
+                if (nameAdi === arananKucuk && item.class === "boundary") {
+                    puan += 60;
+                }
+                // İlçeleri veya küçük yerleşimleri il merkezinin önüne geçirme
+                if (addrsType === "village" || addrsType === "hamlet" || addrsType === "suburb") {
+                    puan -= 40;
+                }
+            } else {
+                // "İlçe, İl" formatında girildiyse her iki parçanın eşleşmesini ödüllendir
+                const ilkParca = parcalar[0];
+                const ikinciParca = parcalar[1];
+
+                if (ilceAdi.includes(ilkParca) || nameAdi.includes(ilkParca)) {
+                    puan += 50;
+                }
+                if (ilAdi.includes(ikinciParca)) {
+                    puan += 50;
+                }
+            }
+
+            if (puan > enYuksekPuan) {
+                enYuksekPuan = puan;
+                enIyiKayit = item;
+            }
+        }
+
+        return enIyiKayit;
+    }
+
     // İl ve İlçe Arama Fonksiyonu
     async function konumaGit() {
         const arananYer = document.getElementById("il-ilce-input").value.trim();
@@ -204,20 +260,22 @@ document.addEventListener("DOMContentLoaded", function () {
         durumEtiketi.innerText = `"${arananYer}" aranıyor...`;
 
         try {
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(arananYer)}&countrycodes=tr&limit=1`;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(arananYer)}&countrycodes=tr&limit=5`;
             const response = await fetch(url);
             const data = await response.json();
 
             if (data && data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
-                const tamAd = data[0].display_name;
+                const secilen = enUygunSonucuSec(data, arananYer);
+                const lat = parseFloat(secilen.lat);
+                const lon = parseFloat(secilen.lon);
+                const tamAd = secilen.display_name;
+                const zoomSeviyesi = (secilen.addresstype === "province" || secilen.addresstype === "state") ? 11 : 14;
 
                 if (dogrulukDairesi) {
                     map.removeLayer(dogrulukDairesi);
                 }
 
-                map.flyTo([lat, lon], 14);
+                map.flyTo([lat, lon], zoomSeviyesi);
 
                 marker
                     .setLatLng([lat, lon])
